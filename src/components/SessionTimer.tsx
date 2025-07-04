@@ -1,13 +1,12 @@
-
-import { useState, useEffect } from 'react';
-import { Clock } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Clock } from "lucide-react";
 
 const SessionTimer = () => {
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setSeconds(prev => prev + 1);
+      setSeconds((prev) => prev + 1);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -28,9 +27,15 @@ const SessionTimer = () => {
   };
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full animate-pulse">
-      <Clock className="h-4 w-4 text-green-600" />
-      <span className="font-mono text-green-800 font-semibold">
+    <div
+      className="flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full animate-pulse"
+      data-oid="er7sdnr"
+    >
+      <Clock className="h-4 w-4 text-green-600" data-oid="-px.21m" />
+      <span
+        className="font-mono text-green-800 font-semibold"
+        data-oid="pw49m7b"
+      >
         {formatTime(seconds)}
       </span>
     </div>

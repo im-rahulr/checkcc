@@ -1,13 +1,7 @@
-
-import { useState, useEffect } from 'react';
-import { Play, Pause, Users, Lock, Code, ShoppingCart, Palette } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import TimerInterface from '@/components/TimerInterface';
-import GlobalCommunity from '@/components/GlobalCommunity';
-import TopNavigation from '@/components/TopNavigation';
+import { useState, useEffect } from "react";
+import TimerInterface from "@/components/TimerInterface";
+import GlobalCommunity from "@/components/GlobalCommunity";
+import TopNavigation from "@/components/TopNavigation";
 
 const Index = () => {
   const [isWorking, setIsWorking] = useState(false);
@@ -16,19 +10,19 @@ const Index = () => {
     id: 1,
     name: "Alex Chen",
     avatar: "/placeholder.svg",
-    initials: "AC"
+    initials: "AC",
   });
 
   const [sessionData] = useState({
     daysLocked: 0,
-    onlineUsers: 4
+    onlineUsers: 10,
   });
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isWorking) {
       interval = setInterval(() => {
-        setSeconds(prev => prev + 1);
+        setSeconds((prev) => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -39,65 +33,53 @@ const Index = () => {
     if (!isWorking) {
       setSeconds(0);
     }
-    console.log(`${isWorking ? 'Stopping' : 'Starting'} work session for ${currentUser.name}`);
+    console.log(
+      `${isWorking ? "Stopping" : "Starting"} work session for ${currentUser.name}`,
+    );
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat relative overflow-hidden"
-         style={{
-           backgroundImage: `url('/lovable-uploads/b918fb64-1e04-4a90-ab61-9487052412ca.png')`
-         }}>
+    <div
+      className="min-h-screen bg-cover bg-center bg-no-repeat relative overflow-hidden"
+      style={{
+        backgroundImage: `url('https://www.baltana.com/files/wallpapers-25/Minimalist-Dark-Wallpaper-1920x1080-65049.jpg')`,
+      }}
+      data-oid="apytp-u"
+    >
       {/* Dark overlay for better readability */}
-      <div className="absolute inset-0 bg-black/40"></div>
-      
+      <div className="absolute inset-0 bg-black/40" data-oid="ct:e6rs"></div>
+
       {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col">
+      <div
+        className="relative z-10 min-h-screen flex flex-col"
+        data-oid="t9hthax"
+      >
         {/* Top Navigation */}
-        <TopNavigation 
+        <TopNavigation
           currentUser={currentUser}
           daysLocked={sessionData.daysLocked}
           onlineUsers={sessionData.onlineUsers}
+          data-oid="v8j2hhn"
         />
 
         {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center px-4">
-          <div className="w-full max-w-4xl">
+        <div
+          className="flex-1 flex items-center justify-center px-4"
+          data-oid="sva7s4w"
+        >
+          <div className="w-full max-w-4xl" data-oid="k5n858m">
             {/* Central Timer Interface */}
-            <TimerInterface 
+            <TimerInterface
               isWorking={isWorking}
               seconds={seconds}
               onToggle={handleWorkToggle}
+              data-oid="2vl5sli"
             />
-
-            {/* Category Tabs */}
-            <div className="flex justify-center mt-8 space-x-1">
-              <Button 
-                variant="ghost" 
-                className="bg-blue-600/80 text-white hover:bg-blue-500/80 px-6 py-2 rounded-full"
-              >
-                <Code className="w-4 h-4 mr-2" />
-                Code
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="bg-gray-700/60 text-gray-300 hover:bg-gray-600/60 px-6 py-2 rounded-full"
-              >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Market
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="bg-gray-700/60 text-gray-300 hover:bg-gray-600/60 px-6 py-2 rounded-full"
-              >
-                <Palette className="w-4 h-4 mr-2" />
-                Design
-              </Button>
-            </div>
           </div>
         </div>
 
         {/* Right Side Panel - Global Community */}
-        <GlobalCommunity />
+        <GlobalCommunity data-oid="e2qn0ne" />
       </div>
     </div>
   );
