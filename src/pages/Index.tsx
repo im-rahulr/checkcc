@@ -1,16 +1,17 @@
 
 import { useState, useEffect } from 'react';
-import { Play, Pause, Users, Clock, Calendar, TrendingUp } from 'lucide-react';
+import { Play, Pause, Users, Lock, Code, ShoppingCart, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import ContributionGraph from '@/components/ContributionGraph';
-import LiveUsers from '@/components/LiveUsers';
-import SessionTimer from '@/components/SessionTimer';
+import TimerInterface from '@/components/TimerInterface';
+import GlobalCommunity from '@/components/GlobalCommunity';
+import TopNavigation from '@/components/TopNavigation';
 
 const Index = () => {
   const [isWorking, setIsWorking] = useState(false);
+  const [seconds, setSeconds] = useState(0);
   const [currentUser] = useState({
     id: 1,
     name: "Alex Chen",
@@ -18,143 +19,85 @@ const Index = () => {
     initials: "AC"
   });
 
-  const [sessionData, setSessionData] = useState({
-    todayHours: 3.5,
-    weekHours: 24.5,
-    monthHours: 98.2,
-    totalSessions: 47
+  const [sessionData] = useState({
+    daysLocked: 0,
+    onlineUsers: 4
   });
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isWorking) {
+      interval = setInterval(() => {
+        setSeconds(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isWorking]);
 
   const handleWorkToggle = () => {
     setIsWorking(!isWorking);
+    if (!isWorking) {
+      setSeconds(0);
+    }
     console.log(`${isWorking ? 'Stopping' : 'Starting'} work session for ${currentUser.name}`);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Project Workspace</h1>
-            <p className="text-gray-600">Collaborate and track your team's productivity</p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={currentUser.avatar} />
-                <AvatarFallback className="bg-blue-500 text-white text-sm">
-                  {currentUser.initials}
-                </AvatarFallback>
-              </Avatar>
-              <span className="font-medium text-gray-700">{currentUser.name}</span>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat relative overflow-hidden"
+         style={{
+           backgroundImage: `url('/lovable-uploads/b918fb64-1e04-4a90-ab61-9487052412ca.png')`
+         }}>
+      {/* Dark overlay for better readability */}
+      <div className="absolute inset-0 bg-black/40"></div>
+      
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Top Navigation */}
+        <TopNavigation 
+          currentUser={currentUser}
+          daysLocked={sessionData.daysLocked}
+          onlineUsers={sessionData.onlineUsers}
+        />
 
-        {/* Main Action Card */}
-        <Card className="border-2 border-dashed border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-          <CardContent className="p-8">
-            <div className="flex flex-col items-center space-y-6">
-              <div className="text-center">
-                <h2 className="text-2xl font-semibold mb-2 text-gray-800">
-                  {isWorking ? "You're in the zone! 🚀" : "Ready to start working?"}
-                </h2>
-                <p className="text-gray-600">
-                  {isWorking 
-                    ? "Your session is being tracked. Keep up the great work!" 
-                    : "Click the button below to begin tracking your work session"
-                  }
-                </p>
-              </div>
+        {/* Main Content */}
+        <div className="flex-1 flex items-center justify-center px-4">
+          <div className="w-full max-w-4xl">
+            {/* Central Timer Interface */}
+            <TimerInterface 
+              isWorking={isWorking}
+              seconds={seconds}
+              onToggle={handleWorkToggle}
+            />
 
-              <Button
-                onClick={handleWorkToggle}
-                size="lg"
-                className={`h-16 px-8 text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
-                  isWorking 
-                    ? 'bg-red-500 hover:bg-red-600 text-white' 
-                    : 'bg-green-500 hover:bg-green-600 text-white'
-                }`}
+            {/* Category Tabs */}
+            <div className="flex justify-center mt-8 space-x-1">
+              <Button 
+                variant="ghost" 
+                className="bg-blue-600/80 text-white hover:bg-blue-500/80 px-6 py-2 rounded-full"
               >
-                {isWorking ? (
-                  <>
-                    <Pause className="mr-2 h-6 w-6" />
-                    Stop Working
-                  </>
-                ) : (
-                  <>
-                    <Play className="mr-2 h-6 w-6" />
-                    Start Working
-                  </>
-                )}
+                <Code className="w-4 h-4 mr-2" />
+                Code
               </Button>
-
-              {isWorking && <SessionTimer />}
+              <Button 
+                variant="ghost" 
+                className="bg-gray-700/60 text-gray-300 hover:bg-gray-600/60 px-6 py-2 rounded-full"
+              >
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Market
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="bg-gray-700/60 text-gray-300 hover:bg-gray-600/60 px-6 py-2 rounded-full"
+              >
+                <Palette className="w-4 h-4 mr-2" />
+                Design
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Stats and Live Users Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Quick Stats */}
-          <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-5 w-5 text-blue-500" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Today</p>
-                    <p className="text-2xl font-bold text-gray-900">{sessionData.todayHours}h</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5 text-green-500" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">This Week</p>
-                    <p className="text-2xl font-bold text-gray-900">{sessionData.weekHours}h</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5 text-purple-500" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">This Month</p>
-                    <p className="text-2xl font-bold text-gray-900">{sessionData.monthHours}h</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Users className="h-5 w-5 text-orange-500" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Sessions</p>
-                    <p className="text-2xl font-bold text-gray-900">{sessionData.totalSessions}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
-
-          {/* Live Users */}
-          <LiveUsers />
         </div>
 
-        {/* Contribution Graphs */}
-        <ContributionGraph />
+        {/* Right Side Panel - Global Community */}
+        <GlobalCommunity />
       </div>
     </div>
   );
