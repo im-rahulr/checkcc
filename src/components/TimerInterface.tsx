@@ -56,17 +56,7 @@ const TimerInterface = ({
       </div>
 
       {/* Category Tabs - Moved from Index.tsx */}
-      <div className="flex justify-center space-x-1" data-oid="a88docy">
-        <Button variant="ghost" className="bg-blue-600/80 text-white hover:bg-blue-500/80 px-6 py-2 rounded-md" data-oid="i94-b36">
-          Code
-        </Button>
-        <Button variant="ghost" className="bg-gray-700/60 text-gray-300 hover:bg-gray-600/60 px-6 py-2 rounded-md" data-oid="5oqv2_2">
-          Market
-        </Button>
-        <Button variant="ghost" className="bg-gray-700/60 text-gray-300 hover:bg-gray-600/60 px-6 py-2 rounded-md" data-oid="ore1ee2">
-          Design
-        </Button>
-      </div>
+      
     </div>;
 };
 export default TimerInterface;
