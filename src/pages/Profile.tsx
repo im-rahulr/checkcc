@@ -8,10 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/components/ui/use-toast';
-import { User, Mail, Calendar, Clock } from 'lucide-react';
+import { User, Mail, Calendar, Clock, ArrowLeft, Home } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -122,9 +124,40 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-8">Profile Settings</h1>
+    <div
+      className="min-h-screen bg-cover bg-center bg-no-repeat relative overflow-hidden"
+      style={{
+        backgroundImage: `url('https://www.baltana.com/files/wallpapers-25/Minimalist-Dark-Wallpaper-1920x1080-65049.jpg')`,
+      }}
+    >
+      {/* Dark overlay for better readability */}
+      <div className="absolute inset-0 bg-black/40"></div>
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen p-6">
+        <div className="max-w-4xl mx-auto">
+        {/* Navigation Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/')}
+              className="text-white/80 hover:text-white hover:bg-white/10"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+            <h1 className="text-3xl font-bold text-white">Profile Settings</h1>
+          </div>
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/')}
+            className="text-white/80 hover:text-white hover:bg-white/10"
+          >
+            <Home className="w-4 h-4 mr-2" />
+            Home
+          </Button>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Profile Information Card */}
@@ -210,6 +243,7 @@ const Profile = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
         </div>
       </div>
     </div>

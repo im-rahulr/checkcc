@@ -5,12 +5,15 @@ import { useTimerSessions } from '@/hooks/useTimerSessions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, TrendingUp, Target, Award, BarChart3 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calendar, Clock, TrendingUp, Target, Award, BarChart3, ArrowLeft, Home } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isToday, isThisWeek, isThisMonth } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 const UserTime = () => {
   const { user } = useAuth();
   const { sessions, totalMinutes, loading } = useTimerSessions();
+  const navigate = useNavigate();
   const [weeklyData, setWeeklyData] = useState<any[]>([]);
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [todayMinutes, setTodayMinutes] = useState(0);
@@ -127,16 +130,53 @@ const UserTime = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6 flex items-center justify-center">
-        <div className="text-white text-lg">Loading your time data...</div>
+      <div
+        className="min-h-screen bg-cover bg-center bg-no-repeat relative overflow-hidden flex items-center justify-center"
+        style={{
+          backgroundImage: `url('https://www.baltana.com/files/wallpapers-25/Minimalist-Dark-Wallpaper-1920x1080-65049.jpg')`,
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 text-white text-lg">Loading your time data...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-8">Time Analytics</h1>
+    <div
+      className="min-h-screen bg-cover bg-center bg-no-repeat relative overflow-hidden"
+      style={{
+        backgroundImage: `url('https://www.baltana.com/files/wallpapers-25/Minimalist-Dark-Wallpaper-1920x1080-65049.jpg')`,
+      }}
+    >
+      {/* Dark overlay for better readability */}
+      <div className="absolute inset-0 bg-black/40"></div>
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen p-6">
+        <div className="max-w-7xl mx-auto">
+        {/* Navigation Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/')}
+              className="text-white/80 hover:text-white hover:bg-white/10"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+            <h1 className="text-3xl font-bold text-white">Time Analytics</h1>
+          </div>
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/')}
+            className="text-white/80 hover:text-white hover:bg-white/10"
+          >
+            <Home className="w-4 h-4 mr-2" />
+            Home
+          </Button>
+        </div>
         
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -325,6 +365,7 @@ const UserTime = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </div>
   );
