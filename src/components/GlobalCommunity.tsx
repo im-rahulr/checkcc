@@ -28,36 +28,51 @@ const GlobalCommunity = () => {
 
     const fetchOnlineUsers = async () => {
       try {
-        // Get online users with their profile data and total minutes
-        const { data: onlineUsersData, error } = await supabase
+        // First get online users
+        const { data: onlineUsersData, error: onlineError } = await supabase
           .from('online_users')
-          .select(`
-            user_id,
-            last_seen,
-            profiles (
-              id,
-              email,
-              full_name
-            )
-          `)
+          .select('user_id, last_seen')
           .order('last_seen', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching online users:', error);
+        if (onlineError) {
+          console.error('Error fetching online users:', onlineError);
           return;
         }
 
-        // Fetch total minutes for each user
+        if (!onlineUsersData || onlineUsersData.length === 0) {
+          setOnlineUsers([]);
+          setActiveCount(0);
+          return;
+        }
+
+        // Get user IDs to fetch profiles
+        const userIds = onlineUsersData.map(user => user.user_id);
+
+        // Fetch profiles for online users
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, email, full_name')
+          .in('id', userIds);
+
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError);
+          return;
+        }
+
+        // Combine online users with their profiles and get total minutes
         const usersWithMinutes = await Promise.all(
-          (onlineUsersData || []).map(async (userRecord) => {
+          onlineUsersData.map(async (onlineUser) => {
+            const profile = profilesData?.find(p => p.id === onlineUser.user_id);
+            
+            // Fetch total minutes for each user
             const { data: totalMinutes } = await supabase
-              .rpc('get_user_total_minutes', { user_uuid: userRecord.user_id });
+              .rpc('get_user_total_minutes', { user_uuid: onlineUser.user_id });
 
             return {
-              id: userRecord.user_id,
-              email: userRecord.profiles?.email || 'Unknown',
-              full_name: userRecord.profiles?.full_name,
-              last_seen: userRecord.last_seen,
+              id: onlineUser.user_id,
+              email: profile?.email || 'Unknown',
+              full_name: profile?.full_name,
+              last_seen: onlineUser.last_seen,
               total_minutes: totalMinutes || 0
             };
           })
