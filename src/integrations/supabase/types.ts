@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      online_users: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -68,9 +89,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_offline_users: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_user_total_minutes: {
         Args: { user_uuid: string }
         Returns: number
+      }
+      update_user_presence: {
+        Args: { user_uuid: string }
+        Returns: undefined
       }
     }
     Enums: {

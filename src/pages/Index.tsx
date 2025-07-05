@@ -5,18 +5,18 @@ import GlobalCommunity from "@/components/GlobalCommunity";
 import TopNavigation from "@/components/TopNavigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useTimerSessions } from "@/hooks/useTimerSessions";
+import { useUserPresence } from "@/hooks/useUserPresence";
 
 const Index = () => {
   const { user } = useAuth();
-  const { createSession, endSession } = useTimerSessions();
+  const { createSession, endSession, totalMinutes } = useTimerSessions();
+  const { onlineCount } = useUserPresence();
   const [isWorking, setIsWorking] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
-  const [sessionData] = useState({
-    daysLocked: 0,
-    onlineUsers: 10,
-  });
+  // Calculate days locked (simplified - could be enhanced with actual streak logic)
+  const daysLocked = Math.floor(totalMinutes / (8 * 60)); // Assuming 8 hours = 1 day
 
   // Timer logic
   useEffect(() => {
@@ -89,8 +89,8 @@ const Index = () => {
               .toUpperCase()
               .slice(0, 2),
           }}
-          daysLocked={sessionData.daysLocked}
-          onlineUsers={sessionData.onlineUsers}
+          daysLocked={daysLocked}
+          onlineUsers={onlineCount}
         />
 
         {/* Main Content */}
