@@ -1,10 +1,12 @@
 [build]
-  command = "npm run build"
+  command = "npm ci && npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20"
   NPM_FLAGS = "--production=false"
+  # Ensure clean install to avoid dependency conflicts
+  NPM_CONFIG_AUDIT = "false"
 
 # Headers for security and performance
 [[headers]]
