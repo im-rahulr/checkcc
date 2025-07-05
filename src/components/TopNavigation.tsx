@@ -13,11 +13,13 @@ interface TopNavigationProps {
   };
   daysLocked: number;
   onlineUsers: number;
+  onShowCommunity?: () => void;
 }
 const TopNavigation = ({
   currentUser,
   daysLocked,
-  onlineUsers
+  onlineUsers,
+  onShowCommunity
 }: TopNavigationProps) => {
   const navigate = useNavigate();
   const {
@@ -65,7 +67,11 @@ const TopNavigation = ({
         
         
         
-        <div className="flex items-center space-x-2 text-white/80" data-oid="l9l:v1u">
+        <div
+          className="flex items-center space-x-2 text-white/80 hover:text-white cursor-pointer hover:bg-white/10 rounded-lg px-3 py-2 transition-colors"
+          onClick={onShowCommunity}
+          data-oid="l9l:v1u"
+        >
           <Users className="w-4 h-4" data-oid="mfyd30-" />
           <span className="text-sm" data-oid="rfshk7e">
             {onlineUsers} online

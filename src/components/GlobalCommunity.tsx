@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import UserProfileModal from "./UserProfileModal";
 
 interface OnlineUser {
   id: string;
@@ -17,10 +18,15 @@ interface OnlineUser {
   total_minutes: number;
 }
 
-const GlobalCommunity = () => {
-  const [isVisible, setIsVisible] = useState(true);
+interface GlobalCommunityProps {
+  onClose?: () => void;
+}
+
+const GlobalCommunity = ({ onClose }: GlobalCommunityProps) => {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [activeCount, setActiveCount] = useState(0);
+  const [selectedUser, setSelectedUser] = useState<OnlineUser | null>(null);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -28,6 +34,7 @@ const GlobalCommunity = () => {
 
     const fetchOnlineUsers = async () => {
       try {
+        setLoading(true);
         // First get online users
         const { data: onlineUsersData, error: onlineError } = await supabase
           .from('online_users')
@@ -36,12 +43,14 @@ const GlobalCommunity = () => {
 
         if (onlineError) {
           console.error('Error fetching online users:', onlineError);
+          setLoading(false);
           return;
         }
 
         if (!onlineUsersData || onlineUsersData.length === 0) {
           setOnlineUsers([]);
           setActiveCount(0);
+          setLoading(false);
           return;
         }
 
@@ -51,7 +60,7 @@ const GlobalCommunity = () => {
         // Fetch profiles for online users
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, email, full_name')
+          .select('id, full_name')
           .in('id', userIds);
 
         if (profilesError) {
@@ -63,14 +72,17 @@ const GlobalCommunity = () => {
         const usersWithMinutes = await Promise.all(
           onlineUsersData.map(async (onlineUser) => {
             const profile = profilesData?.find(p => p.id === onlineUser.user_id);
-            
+
             // Fetch total minutes for each user
             const { data: totalMinutes } = await supabase
               .rpc('get_user_total_minutes', { user_uuid: onlineUser.user_id });
 
+            // Generate a display name from user ID if no profile data
+            const displayName = profile?.full_name || `User ${onlineUser.user_id.slice(0, 8)}`;
+
             return {
               id: onlineUser.user_id,
-              email: profile?.email || 'Unknown',
+              email: displayName, // Using this field for display name
               full_name: profile?.full_name,
               last_seen: onlineUser.last_seen,
               total_minutes: totalMinutes || 0
@@ -82,6 +94,8 @@ const GlobalCommunity = () => {
         setActiveCount(usersWithMinutes.length);
       } catch (error) {
         console.error('Error fetching online users:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -125,10 +139,8 @@ const GlobalCommunity = () => {
   };
 
   const getDisplayName = (name: string | undefined, email: string) => {
-    return name || email.split('@')[0];
+    return name || email; // email now contains the display name
   };
-
-  if (!isVisible) return null;
 
   return (
     <div className="fixed top-4 right-4 w-80 backdrop-blur-md bg-black/30 rounded-xl border border-white/10">
@@ -142,7 +154,7 @@ const GlobalCommunity = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsVisible(false)}
+            onClick={onClose}
             className="text-white/60 hover:text-white hover:bg-white/10 h-6 w-6"
           >
             <X className="w-4 h-4" />
@@ -172,7 +184,11 @@ const GlobalCommunity = () => {
 
           <TabsContent value="online" className="mt-4">
             <div className="space-y-3">
-              {onlineUsers.length === 0 ? (
+              {loading ? (
+                <p className="text-white/60 text-sm text-center py-4">
+                  Loading online users...
+                </p>
+              ) : onlineUsers.length === 0 ? (
                 <p className="text-white/60 text-sm text-center py-4">
                   No users online right now
                 </p>
@@ -180,13 +196,14 @@ const GlobalCommunity = () => {
                 onlineUsers.map((user) => (
                   <div
                     key={user.id}
-                    className="bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-colors"
+                    className="bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-colors cursor-pointer"
+                    onClick={() => setSelectedUser(user)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="relative">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src="/placeholder.svg" />
+                            <AvatarImage src="" />
                             <AvatarFallback className="bg-purple-500 text-white text-xs">
                               {getInitials(user.full_name || '', user.email)}
                             </AvatarFallback>
@@ -235,7 +252,8 @@ const GlobalCommunity = () => {
                 .map((user, index) => (
                   <div
                     key={user.id}
-                    className="bg-white/5 rounded-lg p-3"
+                    className="bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-colors cursor-pointer"
+                    onClick={() => setSelectedUser(user)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -267,6 +285,15 @@ const GlobalCommunity = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* User Profile Modal */}
+      {selectedUser && (
+        <UserProfileModal
+          userId={selectedUser.id}
+          userName={getDisplayName(selectedUser.full_name, selectedUser.email)}
+          onClose={() => setSelectedUser(null)}
+        />
+      )}
     </div>
   );
 };

@@ -127,11 +127,11 @@ const Profile = () => {
     <div
       className="min-h-screen bg-cover bg-center bg-no-repeat relative overflow-hidden"
       style={{
-        backgroundImage: `url('https://www.baltana.com/files/wallpapers-25/Minimalist-Dark-Wallpaper-1920x1080-65049.jpg')`,
+        backgroundImage: `url('https://i.pinimg.com/originals/41/2a/78/412a78098d247e244cd3612296ec2be1.gif')`,
       }}
     >
       {/* Dark overlay for better readability */}
-      <div className="absolute inset-0 bg-black/40"></div>
+      <div className="absolute inset-0 bg-black/60"></div>
 
       {/* Content */}
       <div className="relative z-10 min-h-screen p-6">
@@ -171,7 +171,7 @@ const Profile = () => {
             <CardContent className="space-y-4">
               <div className="flex justify-center mb-6">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src="/placeholder.svg" />
+                  <AvatarImage src={user?.user_metadata?.avatar_url || ""} />
                   <AvatarFallback className="bg-purple-500 text-white text-lg">
                     {getInitials()}
                   </AvatarFallback>
