@@ -1,23 +1,24 @@
+
 import { useState, useEffect } from "react";
 import TimerInterface from "@/components/TimerInterface";
 import GlobalCommunity from "@/components/GlobalCommunity";
 import TopNavigation from "@/components/TopNavigation";
+import { useAuth } from "@/hooks/useAuth";
+import { useTimerSessions } from "@/hooks/useTimerSessions";
 
 const Index = () => {
+  const { user } = useAuth();
+  const { createSession, endSession } = useTimerSessions();
   const [isWorking, setIsWorking] = useState(false);
   const [seconds, setSeconds] = useState(0);
-  const [currentUser] = useState({
-    id: 1,
-    name: "Alex Chen",
-    avatar: "/placeholder.svg",
-    initials: "AC",
-  });
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
   const [sessionData] = useState({
     daysLocked: 0,
     onlineUsers: 10,
   });
 
+  // Timer logic
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (isWorking) {
@@ -28,14 +29,39 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [isWorking]);
 
-  const handleWorkToggle = () => {
-    setIsWorking(!isWorking);
+  const handleWorkToggle = async () => {
     if (!isWorking) {
-      setSeconds(0);
+      // Starting a new session
+      const session = await createSession();
+      if (session) {
+        setCurrentSessionId(session.id);
+        setIsWorking(true);
+        setSeconds(0);
+        console.log(`Starting work session for ${user?.email}`);
+      }
+    } else {
+      // Pausing current session
+      setIsWorking(false);
+      console.log(`Pausing work session for ${user?.email}`);
     }
-    console.log(
-      `${isWorking ? "Stopping" : "Starting"} work session for ${currentUser.name}`,
-    );
+  };
+
+  const handleReset = () => {
+    setIsWorking(false);
+    setSeconds(0);
+    setCurrentSessionId(null);
+  };
+
+  const handleComplete = async () => {
+    if (currentSessionId && seconds > 0) {
+      const durationMinutes = Math.floor(seconds / 60);
+      await endSession(currentSessionId, durationMinutes);
+      
+      // Reset timer after completing session
+      setIsWorking(false);
+      setSeconds(0);
+      setCurrentSessionId(null);
+    }
   };
 
   return (
@@ -44,42 +70,45 @@ const Index = () => {
       style={{
         backgroundImage: `url('https://www.baltana.com/files/wallpapers-25/Minimalist-Dark-Wallpaper-1920x1080-65049.jpg')`,
       }}
-      data-oid="apytp-u"
     >
       {/* Dark overlay for better readability */}
-      <div className="absolute inset-0 bg-black/40" data-oid="ct:e6rs"></div>
+      <div className="absolute inset-0 bg-black/40"></div>
 
       {/* Content */}
-      <div
-        className="relative z-10 min-h-screen flex flex-col"
-        data-oid="t9hthax"
-      >
+      <div className="relative z-10 min-h-screen flex flex-col">
         {/* Top Navigation */}
         <TopNavigation
-          currentUser={currentUser}
+          currentUser={{
+            id: 1,
+            name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Focus Master',
+            avatar: "/placeholder.svg",
+            initials: (user?.user_metadata?.full_name || user?.email || 'FM')
+              .split(' ')
+              .map((n: string) => n[0])
+              .join('')
+              .toUpperCase()
+              .slice(0, 2),
+          }}
           daysLocked={sessionData.daysLocked}
           onlineUsers={sessionData.onlineUsers}
-          data-oid="v8j2hhn"
         />
 
         {/* Main Content */}
-        <div
-          className="flex-1 flex items-center justify-center px-4"
-          data-oid="sva7s4w"
-        >
-          <div className="w-full max-w-4xl" data-oid="k5n858m">
+        <div className="flex-1 flex items-center justify-center px-4">
+          <div className="w-full max-w-4xl">
             {/* Central Timer Interface */}
             <TimerInterface
               isWorking={isWorking}
               seconds={seconds}
               onToggle={handleWorkToggle}
-              data-oid="2vl5sli"
+              onReset={handleReset}
+              onComplete={handleComplete}
             />
           </div>
         </div>
 
         {/* Right Side Panel - Global Community */}
-        <GlobalCommunity data-oid="e2qn0ne" />
+        <GlobalCommunity />
       </div>
     </div>
   );

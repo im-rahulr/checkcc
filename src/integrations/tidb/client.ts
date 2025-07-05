@@ -1,3 +1,4 @@
+
 import { Pool, PoolClient } from 'pg';
 import { toast } from '@/components/ui/use-toast';
 
@@ -13,9 +14,9 @@ const dbConfig = {
     ca: import.meta.env.VITE_TIDB_CA_CERT || ''
   },
   // Connection pool settings
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
-  connectionTimeoutMillis: 5000, // How long to wait for a connection from the pool
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
 };
 
 // Create the connection pool
@@ -33,9 +34,6 @@ pool.on('error', (err: Error) => {
 
 /**
  * Executes a database query using the connection pool
- * @param text SQL query to execute
- * @param params Query parameters
- * @returns Query result
  */
 export async function query(text: string, params?: any[]) {
   const start = Date.now();
@@ -52,24 +50,23 @@ export async function query(text: string, params?: any[]) {
 
 /**
  * Gets a client from the pool for transactions
- * @returns Client from the pool
  */
 export async function getClient(): Promise<PoolClient> {
   const client = await pool.connect();
-  const query = client.query;
-  const release = client.release;
+  const originalQuery = client.query;
+  const originalRelease = client.release;
 
   // Override client.query to log queries
-  client.query = (...args: any[]) => {
-    client.lastQuery = args;
-    return query.apply(client, args);
+  (client as any).query = (...args: any[]) => {
+    (client as any).lastQuery = args;
+    return originalQuery.apply(client, args);
   };
 
-  // Override client.release to keep track of when it was released
+  // Override client.release to restore original methods
   client.release = () => {
-    client.query = query;
-    client.release = release;
-    return release.apply(client);
+    client.query = originalQuery;
+    client.release = originalRelease;
+    return originalRelease.apply(client);
   };
 
   return client;
@@ -77,8 +74,6 @@ export async function getClient(): Promise<PoolClient> {
 
 /**
  * Executes a transaction
- * @param callback Function that receives a client and executes queries
- * @returns Result of the callback function
  */
 export async function transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
   const client = await getClient();
@@ -95,5 +90,4 @@ export async function transaction<T>(callback: (client: PoolClient) => Promise<T
   }
 }
 
-// Export the pool for direct use if needed
-export default pool; 
+export default pool;
